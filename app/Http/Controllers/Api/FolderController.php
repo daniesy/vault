@@ -25,11 +25,25 @@ class FolderController extends Controller
         return explode(",", $normalizedTypes);
     }
 
+    private function getFilesQuery($query, array $fileTypes)
+    {
+        $query->when(!empty($fileTypes), function ($query) use ($fileTypes) {
+            $query->whereIn('type', $fileTypes);
+        })->orderBy('created_at', 'desc');
+
+        return $query;
+    }
+
     public function index(Request $request): FolderResource
     {
         $fileTypes = $this->processFileTypes($request->get('file-types'));
         $folder = $request->user()->folders()->firstOrCreate(['name' => '/', 'parent_id' => null]);
-        $folder->load(['files' => fn ($query) => empty($fileTypes) ? $query : $query->whereIn('type', $fileTypes), 'children']);
+
+        $folder->load([
+            'files' => fn ($query) => $this->getFilesQuery($query, $fileTypes),
+            'children'
+        ]);
+
         return new FolderResource($folder);
     }
 
