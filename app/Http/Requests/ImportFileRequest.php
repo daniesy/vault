@@ -23,6 +23,7 @@ class ImportFileRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'folder' => 'sometimes|exists:folders,id',
             'url' => 'required|url'
         ];
     }

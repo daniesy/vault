@@ -96,14 +96,27 @@ class FileController extends Controller
         return new UploadedFile($tmp, basename($url));
     }
 
-    public function import(Folder $folder, ImportFileRequest $request): JsonResponse
+    /**
+     * @throws AuthorizationException
+     */
+    public function import(ImportFileRequest $request): JsonResponse
     {
         $url = $request->validated('url');
         // Download the file at the url
         $file = $this->downloadFile($url);
 
+        $folderId = $request->get('folder');
+        if ($folderId) {
+            $folder = $request->user()->folders()->findOrFail($folderId);
+            $this->authorize('update', $folder);
+        } else {
+            // If no folder is specified, use the root folder
+            $folder = $request->user()->folders()->firstOrCreate(['name' => '/', 'parent_id' => null]);
+        }
+
+
         // Upload the file to the storage
-        $extra = $this->uploadFile($file);
+        $extra = $this->uploadFile($file, $request->user()->id);
 
         $file = $request->user()->files()->create([
             ...$extra,

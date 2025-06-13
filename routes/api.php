@@ -23,5 +23,6 @@ Route::middleware('auth.api')->group(function() {
     Route::get("/folders/search", [FolderController::class, 'search'])->name('folders.search');
     Route::apiResource('folders', FolderController::class);
     Route::apiResource('folders.files', FileController::class)->except(['index', 'show']);
-    Route::post('/folders/{folder}/files/import', [FileController::class, 'import'])->name('files.import');
+
+    Route::post('/files/import', [FileController::class, 'import'])->name('files.import');
 });
