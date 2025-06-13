@@ -76,6 +76,8 @@ class FolderController extends Controller
      */
     public function show(Folder $folder): FolderResource
     {
+        $this->authorize('view', $folder);
+
         $folder->load(['files', 'children']);
 
         return new FolderResource($folder);
@@ -92,6 +94,8 @@ class FolderController extends Controller
     // Update the specified resource in storage.
     public function update(FolderRequest $request, Folder $folder): JsonResponse
     {
+        $this->authorize('update', $folder);
+
         $folder->update($request->validated());
 
         return response()->json([
@@ -104,6 +108,8 @@ class FolderController extends Controller
 
     public function destroy(Folder $folder): JsonResponse
     {
+        $this->authorize('delete', $folder);
+
         $folder->delete();
 
         return response()->json([

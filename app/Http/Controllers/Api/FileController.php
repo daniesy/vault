@@ -11,6 +11,7 @@ use App\Http\Resources\FileSearchResult;
 use App\Http\Resources\FolderSearchResult;
 use App\Models\File;
 use App\Models\Folder;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -35,6 +36,7 @@ class FileController extends Controller
      */
     public function store(Folder $folder, FileRequest $request): JsonResponse
     {
+        $this->authorize('update', $folder);
         $extra = $this->uploadFile($request->file('file'), $request->user()->id);
 
         $file = $request->user()->files()->create([
@@ -56,6 +58,9 @@ class FileController extends Controller
      */
     public function update(Folder $folder, File $file, UpdateFileRequest $request): JsonResponse
     {
+        $this->authorize('update', $folder);
+        $this->authorize('update', $file);
+
         $file->update($request->validated());
 
         return response()->json([
@@ -71,6 +76,9 @@ class FileController extends Controller
      */
     public function destroy(Folder $folder, File $file): JsonResponse
     {
+        $this->authorize('delete', $folder);
+        $this->authorize('delete', $file);
+
         $file->delete();
 
         return response()->json([
