@@ -74,11 +74,12 @@ class FolderController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Folder $folder): FolderResource
+    public function show(Request $request, Folder $folder): FolderResource
     {
         $this->authorize('view', $folder);
+        $fileTypes = $this->processFileTypes($request->get('file-types'));
 
-        $folder->load(['files', 'children']);
+        $folder->load(['files' => fn ($query) => $this->getFilesQuery($query, $fileTypes), 'children']);
 
         return new FolderResource($folder);
     }
